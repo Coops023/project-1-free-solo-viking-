@@ -1,6 +1,4 @@
-const bgImg = document.createElement('img');
 
-bgImg.src = '/assets/background.png';
 
 class Background {
     constructor(canvasContext) {
@@ -8,9 +6,17 @@ class Background {
         this.x = 0;
         this.y = 0;
         this.width = 500;
-        this.heigh = 500;
+        this.height = 500;
     }
+    onLoad(fn) {
+        this.img = new Image()
+        this.img.addEventListener("load", () => {
+            fn()
+        })
+        this.img.src = "/assets/background.png"
+    }
+
     draw() {
-        this.ctx.drawImage(bgImg, this.x, this.y, this.width, this.height);
+        this.ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
     }
 }

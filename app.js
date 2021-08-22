@@ -1,26 +1,17 @@
 
 window.onload = () => {
-    //all const variables
-    const scale = 2;
-    const width = 113;
-    const height = 292;
-    const scaledWidth = width / scale;
-    const scaledHeight = height / scale;
-    const cycleLoop = [0, 1, 0, 1];
-    const movementSpeed = 2;
-    const frameLimit = 12
 
-    //all let variable 
     let canvas = document.querySelector('canvas');
     let ctx = canvas.getContext('2d');
-    let currentLoopIndex = 0;
-    let frameCount = 0;
-    let currentDirection = 0;
     let keyPresses = {}
-    let positionX = 220;
-    let positionY = 350;
-    let img = new Image();
 
+    const climber = new Character(ctx, {
+        posX: 220,
+        posY: 350,
+        scale: 0.5,
+        moveSpeed: 2
+    })
+    const background = new Background(ctx)
 
     //event listeners
     window.addEventListener('keydown', keyDownListner, false);
@@ -33,66 +24,47 @@ window.onload = () => {
     }
 
     //load character
+    let climberLoaded = false;
+    let bgLoaded = false;
+    background.onLoad(() => {
+        bgLoaded = true;
+        console.log("bg loaded")
+        if (climberLoaded && bgLoaded) { window.requestAnimationFrame(gameLoop) }
+    })
+    climber.onLoad(() => {
+        climberLoaded = true;
+        console.log("climber loaded")
+        if (climberLoaded && bgLoaded) { window.requestAnimationFrame(gameLoop) }
 
-    img.src = '/assets/climber-images.png';
-    img.onload = function () {
-        window.requestAnimationFrame(gameLoop);
-    };
-
-    // draws the image frame for animation
-    function drawFrame(frameX, frameY, canvasX, canvasY) {
-        ctx.drawImage(img,
-            frameX * width, frameY * height, width, height,
-            canvasX, canvasY, scaledWidth, scaledHeight);
-    }
-
-
+    })
 
     // game loop
     function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-
-        let hasMoved = false;
+        let deltaX = 0;
+        let deltaY = 0;
 
         if (keyPresses.ArrowUp) {
-            moveCharacter(0, -movementSpeed);
-            hasMoved = true;
+            deltaY = -1
         } else if (keyPresses.ArrowDown) {
-            moveCharacter(0, movementSpeed); hasMoved = true;
+            deltaY = 1
         }
         if (keyPresses.ArrowLeft) {
-            moveCharacter(-movementSpeed, 0); hasMoved = true;
+            deltaX = -1
         } else if (keyPresses.ArrowRight) {
-            moveCharacter(movementSpeed, 0);
-            hasMoved = true;
+            deltaX = 1
         }
+        climber.move(deltaX, deltaY, canvas.width, canvas.height)
 
-        if (hasMoved) {
-            frameCount++;
-            if (frameCount >= frameLimit) {
-                frameCount = 0;
-                currentLoopIndex++
-                if (currentLoopIndex >= cycleLoop.length) {
-                    currentLoopIndex = 0;
-                }
-            }
-        }
+        background.draw()
+        climber.draw()
 
-        drawFrame(cycleLoop[currentLoopIndex], currentDirection, positionX, positionY);
+
         window.requestAnimationFrame(gameLoop);
-
     }
-    // move character function stops the character from leaving the canvas
-    function moveCharacter(deltaX, deltaY) {
-        if (positionX + deltaX > 0 && positionX + scaledWidth + deltaX < canvas.width) {
-            positionX += deltaX;
-        }
-        if (positionY + deltaY > 0 && positionY + scaledHeight + deltaY < canvas.height) {
-            positionY += deltaY;
-        }
 
-    }
+
 
 
 }
